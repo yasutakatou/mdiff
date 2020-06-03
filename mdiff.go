@@ -256,8 +256,8 @@ func showDiff(cursol int) int {
 			case 32, 65514, 65518: // Right, and Space
 				diffTop = diffTop + termYSize
 			case 27: //ESC
-				termbox.SetCursor(0, termYSize)
-				fmt.Println("")
+				// termbox.SetCursor(0, termYSize)
+				// fmt.Println("")
 				termbox.Flush()
 				ui.Close()
 				os.Exit(0)
@@ -291,8 +291,8 @@ func showDiff(cursol int) int {
 			case 'h', 'H':
 				diffTop = diffTop + termYSize
 			case 'q', 'Q':
-				termbox.SetCursor(0, termYSize)
-				fmt.Println("")
+				// termbox.SetCursor(0, termYSize)
+				// fmt.Println("")
 				termbox.Flush()
 				ui.Close()
 				os.Exit(0)
