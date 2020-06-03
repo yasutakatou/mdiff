@@ -38,7 +38,7 @@ const (
 func main() {
 	flag.Parse()
 
-	if flag.NArg() == 0 {
+	if flag.NArg() < 2 {
 		fmt.Println("mdiff: Multi Diff Tool.")
 		fmt.Println("usage) mdiff [Master] [Diffs...]")
 		os.Exit(1)
