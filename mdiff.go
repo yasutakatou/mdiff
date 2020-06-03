@@ -55,7 +55,8 @@ func main() {
 	defer termbox.Close()
 
 	termXSize, termYSize = termbox.Size()
-	termYSize = termYSize - 1
+	//termYSize = termYSize - 1
+	termYSize = termYSize
 
 	if err := ui.Init(); err != nil {
 		log.Fatalf("failed to initialize termui: %v", err)
@@ -76,9 +77,9 @@ func main() {
 
 	ui.Render(lDisplay, rDisplay)
 
-	termbox.SetCursor(0, termYSize)
-	MenuBar()
-	termbox.HideCursor()
+	// termbox.SetCursor(0, termYSize)
+	// MenuBar()
+	// termbox.HideCursor()
 
 	masterEnterCode = detectReturnCode(diffs[0].Strings)
 
@@ -150,9 +151,9 @@ func splitDiffStr(diffStr []string) ([]string, []string) {
 	return lStr, rStr
 }
 
-func MenuBar() {
-	fmt.Printf(" Next[Tab,x] Pre[BS,z] PDown[→,h,Space] PUp[←,l] Up[↑,k] Down[↓,j] Commit[Enter,c] Search[Home:/] Exit[Esc,q]")
-}
+// func MenuBar() {
+// 	fmt.Printf(" Next[Tab,x] Pre[BS,z] PDown[→,h,Space] PUp[←,l] Up[↑,k] Down[↓,j] Commit[Enter,c] Search[Home:/] Exit[Esc,q]")
+// }
 
 func printToBuffer(diffTop int, lStr, rStr []string, lLen, rLen int) {
 	lDisplay.Text = ""
@@ -169,9 +170,9 @@ func printToBuffer(diffTop int, lStr, rStr []string, lLen, rLen int) {
 	}
 
 	ui.Render(lDisplay, rDisplay)
-	termbox.SetCursor(0, termYSize)
-	MenuBar()
-	termbox.HideCursor()
+	// termbox.SetCursor(0, termYSize)
+	// MenuBar()
+	// termbox.HideCursor()
 }
 
 func detectReturnCode(strs string) string {
