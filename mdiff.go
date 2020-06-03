@@ -317,6 +317,8 @@ func inputStr() string {
 			case 32: //Space
 				strs += " "
 				break
+			case 27:
+				return ""
 			case 13:
 				return strs
 			default:
@@ -334,6 +336,7 @@ func inputStr() string {
 		fmt.Printf(commitStr)
 		termbox.HideCursor()
 	}
+	return ""
 }
 
 func searchStr(lStr []string, diffTop int) int {
@@ -348,13 +351,16 @@ func searchStr(lStr []string, diffTop int) int {
 	termbox.HideCursor()
 
 	strs := inputStr()
+	if len(strs) == 0 {
+		return diffTop
+	}
 
 	for i := 0; i < len(lStr); i++ {
 		if strings.Index(lStr[i], strs) != -1 {
 			return i
 		}
 	}
-	return 0
+	return diffTop
 }
 
 func commtDiff(dstFilename string, cursol, diffTop int) bool {
