@@ -55,7 +55,6 @@ func main() {
 	defer termbox.Close()
 
 	termXSize, termYSize = termbox.Size()
-	//termYSize = termYSize - 1
 	termYSize = termYSize
 
 	if err := ui.Init(); err != nil {
@@ -76,10 +75,6 @@ func main() {
 	rDisplay.BorderStyle.Bg = ui.ColorBlack
 
 	ui.Render(lDisplay, rDisplay)
-
-	// termbox.SetCursor(0, termYSize)
-	// MenuBar()
-	// termbox.HideCursor()
 
 	masterEnterCode = detectReturnCode(diffs[0].Strings)
 
@@ -151,10 +146,6 @@ func splitDiffStr(diffStr []string) ([]string, []string) {
 	return lStr, rStr
 }
 
-// func MenuBar() {
-// 	fmt.Printf(" Next[Tab,x] Pre[BS,z] PDown[→,h,Space] PUp[←,l] Up[↑,k] Down[↓,j] Commit[Enter,c] Search[Home:/] Exit[Esc,q]")
-// }
-
 func printToBuffer(diffTop int, lStr, rStr []string, lLen, rLen int) {
 	lDisplay.Text = ""
 	rDisplay.Text = ""
@@ -170,9 +161,6 @@ func printToBuffer(diffTop int, lStr, rStr []string, lLen, rLen int) {
 	}
 
 	ui.Render(lDisplay, rDisplay)
-	// termbox.SetCursor(0, termYSize)
-	// MenuBar()
-	// termbox.HideCursor()
 }
 
 func detectReturnCode(strs string) string {
@@ -201,6 +189,30 @@ func emptyDiffStr() string {
 		diffStrTmp += " " + v + masterEnterCode
 	}
 	return diffStrTmp
+}
+
+func displayHelp() {
+	lDisplay.Text = ""
+
+	lDisplay.Text = "Keyboard Help.\n\n"
+	lDisplay.Text += fmt.Sprintf("Next[Tab,x]\n")
+	lDisplay.Text += fmt.Sprintf("Pre[BackSpace,z]\n")
+	lDisplay.Text += fmt.Sprintf("PageDown[Right,h,Space]\n")
+	lDisplay.Text += fmt.Sprintf("PageUp[Left,l]\n")
+	lDisplay.Text += fmt.Sprintf("Up[Up,k]\n")
+	lDisplay.Text += fmt.Sprintf("Down[Down,j]\n")
+	lDisplay.Text += fmt.Sprintf("Commit[Enter,c]\n")
+	lDisplay.Text += fmt.Sprintf("Search[Home:/]\n")
+	lDisplay.Text += fmt.Sprintf("Exit[Esc,q]\n")
+
+	ui.Render(lDisplay)
+
+	for {
+		switch ev := termbox.PollEvent(); ev.Type {
+		case termbox.EventKey:
+			return
+		}
+	}
 }
 
 func showDiff(cursol int) int {
@@ -256,8 +268,6 @@ func showDiff(cursol int) int {
 			case 32, 65514, 65518: // Right, and Space
 				diffTop = diffTop + termYSize
 			case 27: //ESC
-				// termbox.SetCursor(0, termYSize)
-				// fmt.Println("")
 				termbox.Flush()
 				ui.Close()
 				os.Exit(0)
@@ -271,6 +281,9 @@ func showDiff(cursol int) int {
 				return cursol + 1
 			case 'z', 'Z':
 				return cursol - 1
+			case 'h', 'H':
+				displayHelp()
+				return cursol
 			case 'c', 'C':
 				if commtDiff(diffs[cursol].Filename, cursol, diffTop) == true {
 					diffs[cursol].Strings = readFile(diffs[cursol].Filename)
@@ -288,11 +301,7 @@ func showDiff(cursol int) int {
 				} else {
 					diffTop = diffTop - termYSize
 				}
-			case 'h', 'H':
-				diffTop = diffTop + termYSize
 			case 'q', 'Q':
-				// termbox.SetCursor(0, termYSize)
-				// fmt.Println("")
 				termbox.Flush()
 				ui.Close()
 				os.Exit(0)
@@ -305,15 +314,13 @@ func showDiff(cursol int) int {
 
 func inputStr() string {
 	strs := ""
-	cnt := 0
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
 			switch ev.Key {
 			case 8: //Backspace
-				if cnt > 0 {
-					strs = strs[0:(cnt - 1)]
-					cnt = cnt - 1
+				if len(strs) > 0 {
+					strs = strs[:(len(strs) - 1)]
 				}
 			case 32: //Space
 				strs += " "
@@ -324,32 +331,18 @@ func inputStr() string {
 				return strs
 			default:
 				strs += string(ev.Ch)
-				cnt = cnt + 1
 			}
 		}
-		termbox.SetInputMode(termbox.InputEsc)
-		termbox.Flush()
-		termbox.SetCursor(0, termYSize)
-		commitStr := " search word: " + strs
-		for i := len(commitStr); i < termXSize-1; i++ {
-			commitStr += " "
-		}
-		fmt.Printf(commitStr)
-		termbox.HideCursor()
+		lDisplay.Text = fmt.Sprintf("search word: ")
+		lDisplay.Text += strs
+		ui.Render(lDisplay)
 	}
 	return ""
 }
 
 func searchStr(lStr []string, diffTop int) int {
-	termbox.SetInputMode(termbox.InputEsc)
-	termbox.Flush()
-	termbox.SetCursor(0, termYSize)
-	commitStr := " search word: "
-	for i := len(commitStr); i < termXSize-1; i++ {
-		commitStr += " "
-	}
-	fmt.Printf(commitStr)
-	termbox.HideCursor()
+	lDisplay.Text = fmt.Sprintf("search word: ")
+	ui.Render(lDisplay)
 
 	strs := inputStr()
 	if len(strs) == 0 {
@@ -365,16 +358,12 @@ func searchStr(lStr []string, diffTop int) int {
 }
 
 func commtDiff(dstFilename string, cursol, diffTop int) bool {
-	termbox.SetInputMode(termbox.InputEsc)
-	termbox.Flush()
-	termbox.SetCursor(0, termYSize)
+	lDisplay.Text = ""
 
-	commitStr := fmt.Sprintf(" src: [%s] dst: [%s] Commit? (y/n/[a]ll)", diffs[0].Filename, dstFilename)
-	for i := len(commitStr); i < termXSize-1; i++ {
-		commitStr += " "
-	}
-	fmt.Printf(commitStr)
-	termbox.HideCursor()
+	lDisplay.Text += fmt.Sprintf("src: [%s]\n", diffs[0].Filename)
+	lDisplay.Text += fmt.Sprintf("dst: [%s]\n", dstFilename)
+	lDisplay.Text += fmt.Sprintf("Commit? (y/n/[a]ll)")
+	ui.Render(lDisplay)
 
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
