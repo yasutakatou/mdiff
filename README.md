@@ -4,7 +4,7 @@ mdiff is **multi tab diff tool on cli, and enable to apply differrece to target 
 
 ## demo
 
-(WIP)
+![demo1](https://github.com/yasutakatou/mdiff/blob/pic/demo.gif)
 
 ## solution
 
@@ -22,7 +22,11 @@ this tool is solution for you.<br>
  - can search words
  - can apply difference  to target file
  - multi platform support by golang
- 
+
+support linux and windows. and rasbian(arm)!<br>
+
+![demo2](https://github.com/yasutakatou/mdiff/blob/pic/pi.png)
+
  ## install
 
 ```
