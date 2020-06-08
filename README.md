@@ -29,6 +29,14 @@ support linux and windows. and rasbian(arm)!<br>
 
  ## install
 
+*If you want to put it under the path, you can use the following.*
+
+```
+go get github.com/yasutakatou/mdiff
+```
+
+*If you want to create a binary and copy it yourself, use the following.*
+
 ```
 git clone https://github.com/yasutakatou/mdiff
 cd mdiff
