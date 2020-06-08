@@ -32,7 +32,6 @@ support linux and windows. and rasbian(arm)!<br>
 ```
 git clone https://github.com/yasutakatou/mdiff
 cd mdiff
-go mod init mdiff
 go build mdiff.go
 ```
 
