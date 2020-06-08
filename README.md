@@ -86,3 +86,7 @@ when you input "a", all copy master file to target file<br>
 **[Home:/]**
 search to master file by word. input word and press enter to search.<br>
 escape key is return to compare difference mode.
+
+## License
+
+MIT
