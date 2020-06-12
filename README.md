@@ -67,43 +67,44 @@ you can compare 1.txt, 2.txt and 3.txt<br>
 
 ## operations
 
-**[h]**
+**[h]**<br>
 display to help of key control.<br>
 
-**[Esc,q]**
+**[Esc,q]**<br>
 exit to program.<br>
 
-**[→,h,Space]**
-scroll down.
+**[→,h,Space]**<br>
+scroll down.<br>
 note) scroll lines to depend your terminal sizes.<br>
 
-**[←,l]**
-scroll up.
+**[←,l]**<br>
+scroll up.<br>
 note) scroll lines to depend your terminal sizes.<br>
 
-**[↑,k]**
+**[↑,k]**<br>
 one line up.<br>
 
-**[↓,j]**
+**[↓,j]**<br>
 one line down.<br>
 
-**[Tab,x]**
+**[Tab,x]**<br>
 change to next tab.<br>
 
-**[BS,z]**
+**[BS,z]**<br>
 back to prev tab.<br>
 
-**[Enter,c]**
+**[Enter,c]**<br>
 commit master file to file of you viewing<br>
 when you input "y", copy text to target file of you viewing from you displayed<br>
 *note) not viewing part isn't change.*<br>
+<br>
 when you input "a", all copy master file to target file<br>
 *note) this function use to apply all text*<br>
 *note) If your text wrote by Shift JIS, this tool convert to utf-8 inside. But, when you commit, this tool return to Shift JIS.*<br>
 
-**[Home:/]**
+**[Home:/]**<br>
 search to master file by word. input word and press enter to search.<br>
-escape key is return to compare difference mode.
+escape key is return to compare difference mode.<br>
 
 ## License
 
