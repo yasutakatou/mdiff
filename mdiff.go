@@ -36,6 +36,9 @@ import (
 
 	"github.com/kylelemons/godebug/diff"
 	"github.com/nsf/termbox-go"
+	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/transform"
+	"github.com/saintfish/chardet"
 
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
@@ -48,8 +51,10 @@ var rDisplay *widgets.Paragraph
 var masterEnterCode string
 
 type stringData struct {
-	Strings  string `json:"strings"`
-	Filename string `json:"filename"`
+	Strings   string `json:"strings"`
+	Filename  string `json:"filename"`
+	Encode    string `json:"Encode"`
+	EnterCode string `json:"EnterCode"`
 }
 
 var diffs = []stringData{}
@@ -68,7 +73,11 @@ func main() {
 	}
 
 	for i := 0; i < flag.NArg(); i++ {
-		diffs = append(diffs, stringData{Strings: readFile(flag.Arg(i)), Filename: flag.Arg(i)})
+		appendDiff := convertFileToStruct(flag.Arg(i))
+
+		if appendDiff.Filename != "" {
+			diffs = append(diffs, appendDiff)
+		}
 	}
 
 	err := termbox.Init()
@@ -99,8 +108,6 @@ func main() {
 
 	ui.Render(lDisplay, rDisplay)
 
-	masterEnterCode = detectReturnCode(diffs[0].Strings)
-
 	cursor := 1
 	for {
 		cursor = showDiff(cursor)
@@ -111,6 +118,25 @@ func main() {
 			cursor = 1
 		}
 	}
+}
+
+func convertFileToStruct(filaname string) (stringData) {
+	tmpStr := readFile(filaname)
+	detector := chardet.NewTextDetector()
+	result, err := detector.DetectBest([]byte(tmpStr))
+	if err == nil {
+		if result.Charset == "Shift_JIS" {
+			tmpStr = sjis_to_utf8(tmpStr)
+		}
+
+		enterCode := detectReturnCode(tmpStr)
+		if len(diffs) == 0 {
+			masterEnterCode = enterCode
+		}
+		tmpStr = strings.Replace(tmpStr, enterCode, masterEnterCode, -1)
+		return stringData{Strings: tmpStr, Filename: filaname, Encode: result.Charset, EnterCode: enterCode}
+	}
+	return stringData{Strings: "", Filename: "", Encode: "", EnterCode: ""}
 }
 
 func readFile(filename string) string {
@@ -309,7 +335,12 @@ func showDiff(cursol int) int {
 				return cursol
 			case 'c', 'C':
 				if commtDiff(diffs[cursol].Filename, cursol, diffTop) == true {
-					diffs[cursol].Strings = readFile(diffs[cursol].Filename)
+					appendDiff := convertFileToStruct(diffs[cursol].Filename)
+					if appendDiff.Filename != "" {
+						diffs[cursol].Strings   = appendDiff.Strings
+						diffs[cursol].Encode    = appendDiff.Encode
+						diffs[cursol].EnterCode = appendDiff.EnterCode
+					}
 				}
 				return cursol
 			case 'j', 'J':
@@ -393,7 +424,7 @@ func commtDiff(dstFilename string, cursol, diffTop int) bool {
 		case termbox.EventKey:
 			switch ev.Ch {
 			case 'a', 'A':
-				writeFile(dstFilename, stringToArray(diffs[0].Strings))
+				writeFile(dstFilename, stringToArray(diffs[0].Strings), diffs[cursol].Encode, diffs[cursol].EnterCode)
 				return true
 			case 'y', 'Y':
 				srcArray := stringToArray(diffs[0].Strings)
@@ -401,7 +432,7 @@ func commtDiff(dstFilename string, cursol, diffTop int) bool {
 				for i := diffTop; i < diffTop+termYSize && i < len(stringToArray(diffs[0].Strings)); i++ {
 					dstArray[i] = srcArray[i]
 				}
-				writeFile(dstFilename, dstArray)
+				writeFile(dstFilename, dstArray, diffs[cursol].Encode, diffs[cursol].EnterCode)
 				return true
 			case 'n', 'N', 'q':
 				return false
@@ -431,7 +462,7 @@ func stringToArray(strs string) []string {
 	return result
 }
 
-func writeFile(dstFilename string, strs []string) bool {
+func writeFile(dstFilename string, strs []string, Encode,enterCode string) bool {
 	file, err := os.Create(dstFilename)
 	if err != nil {
 		fmt.Println(err)
@@ -444,12 +475,22 @@ func writeFile(dstFilename string, strs []string) bool {
 	for i := 0; i < len(strs); i++ {
 		row := strs[i]
 		if i == (len(strs)-1) && len(strs[i]) == 0 {
-			_, err = w.WriteString(row)
+			if Encode == "Shift_JIS" {
+				_, err = w.WriteString(utf8_to_sjis(row))
+			} else {
+				_, err = w.WriteString(row)
+			}
+
 			if err != nil {
 				return false
 			}
 		} else {
-			_, err = w.WriteString(row + masterEnterCode)
+			if Encode == "Shift_JIS" {
+				_, err = w.WriteString(utf8_to_sjis(row + enterCode))
+			} else {
+				_, err = w.WriteString(row + enterCode)
+			}
+
 			if err != nil {
 				return false
 			}
@@ -462,4 +503,27 @@ func writeFile(dstFilename string, strs []string) bool {
 	}
 
 	return true
+}
+
+//FYI: https://qiita.com/uchiko/items/1810ddacd23fd4d3c934
+// ShiftJIS から UTF-8
+func sjis_to_utf8(str string) (string) {
+	ret, err := ioutil.ReadAll(transform.NewReader(strings.NewReader(str), japanese.ShiftJIS.NewDecoder()))
+	if err != nil {
+		fmt.Printf("Convert Error: %s\n", err)
+		return ""
+	}
+	return string(ret)
+}
+
+// UTF-8 から ShiftJIS
+func utf8_to_sjis(str string) (string) {
+        iostr := strings.NewReader(str)
+        rio := transform.NewReader(iostr, japanese.ShiftJIS.NewEncoder())
+        ret, err := ioutil.ReadAll(rio)
+        if err != nil {
+			fmt.Printf("Convert Error: %s\n", err)
+			return ""
+        }
+        return string(ret)
 }
