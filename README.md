@@ -22,6 +22,7 @@ this tool is solution for you.<br>
  - can search words
  - can apply difference  to target file
  - multi platform support by golang
+ - **sjis support**
 
 support linux and windows. and rasbian(arm)!<br>
 
@@ -68,28 +69,38 @@ you can compare 1.txt, 2.txt and 3.txt<br>
 
 **[h]**
 display to help of key control.<br>
+
 **[Esc,q]**
 exit to program.<br>
+
 **[→,h,Space]**
 scroll down.
 note) scroll lines to depend your terminal sizes.<br>
+
 **[←,l]**
 scroll up.
 note) scroll lines to depend your terminal sizes.<br>
+
 **[↑,k]**
 one line up.<br>
+
 **[↓,j]**
 one line down.<br>
+
 **[Tab,x]**
 change to next tab.<br>
+
 **[BS,z]**
 back to prev tab.<br>
+
 **[Enter,c]**
 commit master file to file of you viewing<br>
 when you input "y", copy text to target file of you viewing from you displayed<br>
 *note) not viewing part isn't change.*<br>
 when you input "a", all copy master file to target file<br>
 *note) this function use to apply all text*<br>
+*note) If your text wrote by Shift JIS, this tool convert to utf-8 inside. But, when you commit, this tool return to Shift JIS.*<br>
+
 **[Home:/]**
 search to master file by word. input word and press enter to search.<br>
 escape key is return to compare difference mode.
