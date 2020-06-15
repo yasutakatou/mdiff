@@ -108,4 +108,4 @@ escape key is return to compare difference mode.<br>
 
 ## License
 
-MIT
+ICU License
